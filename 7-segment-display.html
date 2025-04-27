@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<title>7 Segment Display</title>
+<style>
+* {
+background-color: #222;
+color: #fff;
+font-size: 16px;
+font-family: "arial";
+text-align: center;
+accent-color: #444;
+}
+button {
+width: 60px;
+height: 30px;
+}
+.labelFix {
+position: relative;
+bottom: 6px;
+}
+select {
+position: relative;
+bottom: 5px;
+}
+</style>
+<canvas id="7segment" width=300 height=600></canvas>
+<br>
+<input type="range" id="symbolSlider" min=0 max=127 value=0 style="width: 800px">
+<br>
+<span>Decimal Digits:</span>
+<button onclick="symbolSlider.value = 119">0</button>
+<button onclick="symbolSlider.value = 36">1</button>
+<button onclick="symbolSlider.value = 93">2</button>
+<button onclick="symbolSlider.value = 109">3</button>
+<button onclick="symbolSlider.value = 46">4</button>
+<button onclick="symbolSlider.value = 107">5</button>
+<button onclick="symbolSlider.value = 123">6</button>
+<button onclick="symbolSlider.value = 37">7</button>
+<button onclick="symbolSlider.value = 127">8</button>
+<button onclick="symbolSlider.value = 111">9</button>
+<br><br><br>
+<span class="labelFix">Red</span>
+<input type="range" id="Rslider" min=0 max=15 value=15 style="width: 150px">
+<span class="labelFix">Green</span>
+<input type="range" id="Gslider" min=0 max=15 value=0 style="width: 150px">
+<span class="labelFix">Blue</span>
+<input type="range" id="Bslider" min=0 max=15 value=0 style="width: 150px">
+<span id="colourLabel" class="labelFix">Colour:</span>
+<br>
+<span id="widthLabel" class="labelFix">Width:</span>
+<input type="range" id="widthSlider" min=10 max=100 value=50 style="width: 300px">
+<span id="gapLabel" class="labelFix">Gap:</span>
+<input type="range" id="gapSlider" min=10 max=75 value=30 style="width: 300px">
+<br>
+<span id="opacityLabel" class="labelFix">Blank Segment Opacity:</span>
+<input type="range" id="opacitySlider" min=0 max=40 value=15 style="width: 300px">
+<span id="asymLabel" class="labelFix">Asymmetric Divisions:</span>
+<select id="asymSelection">
+<option value="true">On</option>
+<option value="false" selected=true>Off</option>
+</select>
+<script>
+var c = document.getElementById("7segment");
+var ctx = c.getContext("2d");
+setInterval(function() {
+var width = widthSlider.value;
+var widthUnits = 2 + (gapSlider.value/100);
+var seamless = 0.2;
+var R = Rslider.value; var G = Gslider.value; var B = Bslider.value;
+var symbol = symbolSlider.value;
+var darkOpacity = opacitySlider.value;
+var asymmetry = asymSelection.value == "true";
+ctx.fillStyle = "#000";
+ctx.clearRect(0, 0, c.width, c.height);
+segment(1, 150, width/2, false, R, G, B, Math.floor(symbol/1) % 2);
+segment(2, width/2, 150, true, R, G, B, Math.floor(symbol/2) % 2);
+segment(3, 300 - width/2, 150, true, R, G, B, Math.floor(symbol/4) % 2);
+segment(4, 150, 300 - width/2, false, R, G, B, Math.floor(symbol/8) % 2);
+segment(5, width/2, 450 - width, true, R, G, B, Math.floor(symbol/16) % 2);
+segment(6, 300 - width/2, 450 - width, true, R, G, B, Math.floor(symbol/32) % 2);
+segment(7, 150, 600 - width * 1.5, false, R, G, B, Math.floor(symbol/64) % 2);
+function segment(id, x, y, vertical, r, g, b, active) {
+ctx.fillStyle = "rgba(" + r * 17 + "," + g * 17 + "," + b * 17 + "," + (active == 1 ? 100 : darkOpacity) + "%)";
+if (vertical) {
+ctx.fillRect(x - width/2, y - (300 - width * widthUnits)/2, width, 300 - width * widthUnits);
+var asym = (id == 2 || id == 3) ? width/3 : 0;
+if (!asymmetry) {var asym = 0}
+ctx.beginPath();
+ctx.moveTo(x - width/2, y - (300 - width * widthUnits)/2 + seamless);
+ctx.lineTo(x + width/2, y - (300 - width * widthUnits)/2 + seamless);
+ctx.lineTo(x - asym, y - (300 - width * (widthUnits - 1))/2 - (id == 3 ? asym : 0));
+ctx.fill();
+var asym = (id == 5 || id == 6) ? width/3 : 0;
+if (!asymmetry) {var asym = 0}
+ctx.beginPath();
+ctx.moveTo(x - width/2, y + (300 - width * widthUnits)/2 - seamless);
+ctx.lineTo(x + width/2, y + (300 - width * widthUnits)/2 - seamless);
+ctx.lineTo(x - asym, y + (300 - width * (widthUnits - 1))/2 + (id == 6 ? asym : 0));
+ctx.fill();
+} else {
+ctx.fillRect(x - (300 - width * widthUnits)/2, y - width/2, 300 - width * widthUnits, width);
+var asym = (id == 1 || id == 7) ? width/3 : 0;
+if (!asymmetry) {var asym = 0}
+ctx.beginPath();
+ctx.moveTo(x - (300 - width * widthUnits)/2 + seamless, y - width/2);
+ctx.lineTo(x - (300 - width * widthUnits)/2 + seamless, y + width/2);
+ctx.lineTo(x - (300 - width * (widthUnits - 1))/2 - asym, y);
+ctx.fill();
+ctx.beginPath();
+ctx.moveTo(x + (300 - width * widthUnits)/2 - seamless, y - width/2);
+ctx.lineTo(x + (300 - width * widthUnits)/2 - seamless, y + width/2);
+ctx.lineTo(x + (300 - width * (widthUnits - 1))/2 - asym, y + asym * (id == 1 ? -1 : 1));
+ctx.fill();
+}}
+colourLabel.innerHTML = "Colour: #" + Number(Rslider.value).toString(16).toUpperCase() + Number(Gslider.value).toString(16).toUpperCase() + Number(Bslider.value).toString(16).toUpperCase();
+widthLabel.innerHTML = "Width (" + width + "px):";
+gapLabel.innerHTML = "Gap (" + Math.round((widthUnits - 2) * 100) + "%):";
+opacityLabel.innerHTML = "Blank Segment Opacity: (" + darkOpacity + "%):";
+});
+</script>
