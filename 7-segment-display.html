@@ -1,119 +1,114 @@
 <!DOCTYPE html>
-<title>7 Segment Display</title>
+<html>
+<head>
+<title>7 Segment Display 2.0</title>
 <style>
 * {
 background-color: #222;
 color: #fff;
+accent-color: #fff;
 font-size: 16px;
-font-family: "arial";
+font-family: arial;
 text-align: center;
-accent-color: #444;
+}
+span {
+display: inline-block;
+position: relative;
+bottom: 7px;
 }
 button {
-width: 60px;
+width: 88px;
 height: 30px;
-}
-.labelFix {
 position: relative;
 bottom: 6px;
 }
-select {
+#symbolSlider {
 position: relative;
-bottom: 5px;
+left: 7px;
+bottom: 1px;
 }
 </style>
-<canvas id="7segment" width=300 height=600></canvas>
+</head>
+<body>
+<canvas id="display" width=360 height=720></canvas>
 <br>
-<input type="range" id="symbolSlider" min=0 max=127 value=0 style="width: 800px">
+<span id="symbolLabel" style="width: 92.5px; text-align: left;"></span>
+<input type="range" id="symbolSlider" style="width: 1080px;" min=0 max=127 value=0>
 <br>
-<span>Decimal Digits:</span>
-<button onclick="symbolSlider.value = 119">0</button>
-<button onclick="symbolSlider.value = 36">1</button>
-<button onclick="symbolSlider.value = 93">2</button>
-<button onclick="symbolSlider.value = 109">3</button>
-<button onclick="symbolSlider.value = 46">4</button>
-<button onclick="symbolSlider.value = 107">5</button>
-<button onclick="symbolSlider.value = 123">6</button>
-<button onclick="symbolSlider.value = 37">7</button>
-<button onclick="symbolSlider.value = 127">8</button>
-<button onclick="symbolSlider.value = 111">9</button>
-<br><br><br>
-<span class="labelFix">Red</span>
-<input type="range" id="Rslider" min=0 max=15 value=15 style="width: 150px">
-<span class="labelFix">Green</span>
-<input type="range" id="Gslider" min=0 max=15 value=0 style="width: 150px">
-<span class="labelFix">Blue</span>
-<input type="range" id="Bslider" min=0 max=15 value=0 style="width: 150px">
-<span id="colourLabel" class="labelFix">Colour:</span>
+<span style="width: 80px; bottom: 6px;">Shortcuts:</span>
+<button onclick="symbolSlider.value = 0;">Blank</button>
+<button onclick="symbolSlider.value = 119;">0</button>
+<button onclick="symbolSlider.value = 36;">1</button>
+<button onclick="symbolSlider.value = 93;">2</button>
+<button onclick="symbolSlider.value = 109;">3</button>
+<button onclick="symbolSlider.value = 46;">4</button>
+<button onclick="symbolSlider.value = 107;">5</button>
+<button onclick="symbolSlider.value = 123;">6</button>
+<button onclick="symbolSlider.value = 37;">7</button>
+<button onclick="symbolSlider.value = 127;">8</button>
+<button onclick="symbolSlider.value = 111;">9</button>
+<button onclick="symbolSlider.value = 39;">7 Alt</button>
+<br><br>
+<span style="width: 50px;">RGB:</span>
+<input type="range" id="RSlider" style="width: 180px;" min=0 max=15 value=15>
+<input type="range" id="GSlider" style="width: 180px;" min=0 max=15 value=0>
+<input type="range" id="BSlider" style="width: 180px;" min=0 max=15 value=0>
+<span id="colourLabel" style="width: 135px;"></span>
 <br>
-<span id="widthLabel" class="labelFix">Width:</span>
-<input type="range" id="widthSlider" min=10 max=100 value=50 style="width: 300px">
-<span id="gapLabel" class="labelFix">Gap:</span>
-<input type="range" id="gapSlider" min=10 max=75 value=30 style="width: 300px">
+<span id="widthLabel" style="width: 90px;"></span>
+<input type="range" id="widthSlider" style="width: 360px;" min=15 max=120 value=60>
+<span id="gapLabel" style="width: 90px;"></span>
+<input type="range" id="gapSlider" style="width: 360px;" min=0 max=30 value=10>
 <br>
-<span id="opacityLabel" class="labelFix">Blank Segment Opacity:</span>
-<input type="range" id="opacitySlider" min=0 max=40 value=15 style="width: 300px">
-<span id="asymLabel" class="labelFix">Asymmetric Divisions:</span>
-<select id="asymSelection">
-<option value="true">On</option>
-<option value="false" selected=true>Off</option>
-</select>
+<span id="opacityLabel" style="width: 90px;"></span>
+<input type="range" id="opacitySlider" style="width: 360px;" min=0 max=30 value=10>
+<span id="skewLabel" style="width: 90px;"></span>
+<input type="range" id="skewSlider" style="width: 360px;" min=-50 max=50 value=0>
 <script>
-var c = document.getElementById("7segment");
-var ctx = c.getContext("2d");
+var ctx = display.getContext("2d");
 setInterval(function() {
-var width = widthSlider.value;
-var widthUnits = 2 + (gapSlider.value/100);
-var seamless = 0.2;
-var R = Rslider.value; var G = Gslider.value; var B = Bslider.value;
-var symbol = symbolSlider.value;
-var darkOpacity = opacitySlider.value;
-var asymmetry = asymSelection.value == "true";
-ctx.fillStyle = "#000";
-ctx.clearRect(0, 0, c.width, c.height);
-segment(1, 150, width/2, false, R, G, B, Math.floor(symbol/1) % 2);
-segment(2, width/2, 150, true, R, G, B, Math.floor(symbol/2) % 2);
-segment(3, 300 - width/2, 150, true, R, G, B, Math.floor(symbol/4) % 2);
-segment(4, 150, 300 - width/2, false, R, G, B, Math.floor(symbol/8) % 2);
-segment(5, width/2, 450 - width, true, R, G, B, Math.floor(symbol/16) % 2);
-segment(6, 300 - width/2, 450 - width, true, R, G, B, Math.floor(symbol/32) % 2);
-segment(7, 150, 600 - width * 1.5, false, R, G, B, Math.floor(symbol/64) % 2);
-function segment(id, x, y, vertical, r, g, b, active) {
-ctx.fillStyle = "rgba(" + r * 17 + "," + g * 17 + "," + b * 17 + "," + (active == 1 ? 100 : darkOpacity) + "%)";
+var width = Number(widthSlider.value);
+var gap = Number(gapSlider.value);
+var r = Number(RSlider.value); var g = Number(GSlider.value); var b = Number(BSlider.value);
+var opacity = Number(opacitySlider.value);
+var symbol = Number(symbolSlider.value);
+var skew = Number(skewSlider.value)/100;
+function modpower2(n) {return Math.floor(symbol/2**n) % 2;}
+ctx.clearRect(0, 0, display.width, display.height);
+segment(180, width/2, false, modpower2(0));
+segment(width/2, 180, true, modpower2(1));
+segment(360 - width/2, 180, true, modpower2(2));
+segment(180, 360 - width/2, false, modpower2(3));
+segment(width/2, 540 - width, true, modpower2(4));
+segment(360 - width/2, 540 - width, true, modpower2(5));
+segment(180, 720 - width * 1.5, false, modpower2(6));
+function segment(x, y, vertical, on) {
+ctx.fillStyle = "rgba(" + r * 17 + "," + g * 17 + "," + b * 17 + "," + (on == 1 ? 100 : opacity) + "%)";
+ctx.beginPath();
 if (vertical) {
-ctx.fillRect(x - width/2, y - (300 - width * widthUnits)/2, width, 300 - width * widthUnits);
-var asym = (id == 2 || id == 3) ? width/3 : 0;
-if (!asymmetry) {var asym = 0}
-ctx.beginPath();
-ctx.moveTo(x - width/2, y - (300 - width * widthUnits)/2 + seamless);
-ctx.lineTo(x + width/2, y - (300 - width * widthUnits)/2 + seamless);
-ctx.lineTo(x - asym, y - (300 - width * (widthUnits - 1))/2 - (id == 3 ? asym : 0));
-ctx.fill();
-var asym = (id == 5 || id == 6) ? width/3 : 0;
-if (!asymmetry) {var asym = 0}
-ctx.beginPath();
-ctx.moveTo(x - width/2, y + (300 - width * widthUnits)/2 - seamless);
-ctx.lineTo(x + width/2, y + (300 - width * widthUnits)/2 - seamless);
-ctx.lineTo(x - asym, y + (300 - width * (widthUnits - 1))/2 + (id == 6 ? asym : 0));
-ctx.fill();
+ctx.moveTo(x - width/2, y - 180 + width + gap);
+ctx.lineTo(x - width/2, y + 180 - width - gap);
+ctx.lineTo(x + skew * width, y + 180 - width/2 - gap);
+ctx.lineTo(x + width/2, y + 180 - width - gap);
+ctx.lineTo(x + width/2, y - 180 + width + gap);
+ctx.lineTo(x + skew * width, y - 180 + width/2 + gap);
 } else {
-ctx.fillRect(x - (300 - width * widthUnits)/2, y - width/2, 300 - width * widthUnits, width);
-var asym = (id == 1 || id == 7) ? width/3 : 0;
-if (!asymmetry) {var asym = 0}
-ctx.beginPath();
-ctx.moveTo(x - (300 - width * widthUnits)/2 + seamless, y - width/2);
-ctx.lineTo(x - (300 - width * widthUnits)/2 + seamless, y + width/2);
-ctx.lineTo(x - (300 - width * (widthUnits - 1))/2 - asym, y);
+ctx.moveTo(x - 180 + width + gap, y - width/2);
+ctx.lineTo(x + 180 - width - gap, y - width/2);
+ctx.lineTo(x + 180 - width/2 - gap + skew * width, y);
+ctx.lineTo(x + 180 - width - gap, y + width/2);
+ctx.lineTo(x - 180 + width + gap, y + width/2);
+ctx.lineTo(x - 180 + width/2 + gap + skew * width, y);
+}
 ctx.fill();
-ctx.beginPath();
-ctx.moveTo(x + (300 - width * widthUnits)/2 - seamless, y - width/2);
-ctx.lineTo(x + (300 - width * widthUnits)/2 - seamless, y + width/2);
-ctx.lineTo(x + (300 - width * (widthUnits - 1))/2 - asym, y + asym * (id == 1 ? -1 : 1));
-ctx.fill();
-}}
-colourLabel.innerHTML = "Colour: #" + Number(Rslider.value).toString(16).toUpperCase() + Number(Gslider.value).toString(16).toUpperCase() + Number(Bslider.value).toString(16).toUpperCase();
-widthLabel.innerHTML = "Width (" + width + "px):";
-gapLabel.innerHTML = "Gap (" + Math.round((widthUnits - 2) * 100) + "%):";
-opacityLabel.innerHTML = "Blank Segment Opacity: (" + darkOpacity + "%):";
+}
+symbolLabel.innerHTML = "Symbol: " + symbol;
+colourLabel.innerHTML = "Colour: #" + r.toString(16).repeat(2).toUpperCase() + g.toString(16).repeat(2).toUpperCase() + b.toString(16).repeat(2).toUpperCase();
+widthLabel.innerHTML = "Width: " + width;
+gapLabel.innerHTML = "Gap: " + gap;
+opacityLabel.innerHTML = "Opacity: " + opacity;
+skewLabel.innerHTML = "Skew: " + skew;
 });
 </script>
+</body>
+</html>
