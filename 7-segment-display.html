@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>7 Segment Display</title>
+<style>
+* {
+background-color: #222;
+color: #fff;
+accent-color: #fff;
+font-size: 16px;
+font-family: arial;
+}
+body {
+margin: 8px 8px;
+display: grid;
+grid-template-columns: 392px auto;
+grid-template-rows: auto;
+}
+input[type=range] {
+width: 1024px;
+position: relative;
+top: 7px;
+}
+button {
+width: 81.25px;
+height: 32px;
+position: relative;
+left: 2px;
+}
+</style>
+</head>
+<body>
+<div>
+<canvas id="display" width=384 height=768></canvas>
+</div>
+<div>
+<button onclick="symbolS.value = 0;">Blank</button>
+<button onclick="symbolS.value = 119;">0</button>
+<button onclick="symbolS.value = 36;">1</button>
+<button onclick="symbolS.value = 93;">2</button>
+<button onclick="symbolS.value = 109;">3</button>
+<button onclick="symbolS.value = 46;">4</button>
+<button onclick="symbolS.value = 107;">5</button>
+<button onclick="symbolS.value = 123;">6</button>
+<button onclick="symbolS.value = 37;">7</button>
+<button onclick="symbolS.value = 127;">8</button>
+<button onclick="symbolS.value = 111;">9</button>
+<button onclick="symbolS.value = 39;">Alt 7</button>
+<input type="range" id="symbolS" min=0 value=0 max=127>
+<span id="symbolL"></span>
+<div style="height: 32px;"></div>
+<input type="range" id="redS" min=0 value=255 max=255>
+<span id="redL"></span>
+<input type="range" id="greenS" min=0 value=0 max=255>
+<span id="greenL"></span>
+<input type="range" id="blueS" min=0 value=0 max=255>
+<span id="blueL"></span>
+<input type="range" id="widthS" min=0 value=64 max=127>
+<span id="widthL"></span>
+<input type="range" id="gapS" min=0 value=8 max=31>
+<span id="gapL"></span>
+<input type="range" id="squareS" min=0 value=0 max=255>
+<span id="squareL"></span>
+<input type="range" id="opacityS" min=0 value=32 max=255>
+<span id="opacityL"></span>
+</div>
+<script>
+var ctx = display.getContext("2d");
+setInterval(function() {
+var symbol = Number(symbolS.value);
+var red = Number(redS.value); var green = Number(greenS.value); var blue = Number(blueS.value);
+var width = Number(widthS.value);
+var gap = Number(gapS.value);
+var square = Number(squareS.value);
+var opacity = Number(opacityS.value);
+function modpower2(n) {return Math.floor(symbol/2**n) % 2;}
+ctx.clearRect(0, 0, display.width, display.height);
+segment(192, width/2, false, modpower2(0), 1, 0);
+segment(width/2, 192, true, modpower2(1), 1, 1);
+segment(384 - width/2, 192, true, modpower2(2), -1, 1);
+segment(192, 384 - width/2, false, modpower2(3), 0, 0);
+segment(width/2, 576 - width, true, modpower2(4), 1, -1);
+segment(384 - width/2, 576 - width, true, modpower2(5), -1, -1);
+segment(192, 768 - width * 1.5, false, modpower2(6), -1, 0);
+function segment(x, y, vertical, on, sq, sq2) {
+ctx.fillStyle = "rgba(" + red + ", " + green + ", " + blue + ", " + (on == 1 ? 100 : opacity/2.55) + "%)";
+ctx.beginPath();
+if (vertical) {
+ctx.moveTo(x - width/2, y - 192 + width + gap);
+ctx.lineTo(x - width/2, y + 192 - width - gap);
+ctx.lineTo(x - square/510 * width * sq, y + 192 - width/2 - gap + (sq2 == -1 ? square/510 * width : 0));
+ctx.lineTo(x + width/2, y + 192 - width - gap);
+ctx.lineTo(x + width/2, y - 192 + width + gap);
+ctx.lineTo(x - square/510 * width * sq, y - 192 + width/2 + gap - (sq2 == 1 ? square/510 * width : 0));
+} else {
+ctx.moveTo(x - 192 + width + gap, y - width/2);
+ctx.lineTo(x + 192 - width - gap, y - width/2);
+ctx.lineTo(x + 192 - width/2 - gap + square/510 * width, y - square/510 * width * sq);
+ctx.lineTo(x + 192 - width - gap, y + width/2);
+ctx.lineTo(x - 192 + width + gap, y + width/2);
+ctx.lineTo(x - 192 + width/2 + gap - square/510 * width, y - square/510 * width * sq);
+}
+ctx.fill();
+}
+symbolL.innerHTML = "Symbol: " + symbol;
+redL.innerHTML = "Red: " + red;
+greenL.innerHTML = "Green: " + green;
+blueL.innerHTML = "Blue: " + blue;
+widthL.innerHTML = "Segment Width: " + width;
+gapL.innerHTML = "Segment Gap: " + gap;
+squareL.innerHTML = "Segment Shape: " + square;
+opacityL.innerHTML = "Blank Opacity: " + opacity;
+});
+</script>
+</body>
+</html>
